@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import styles from './page.module.css';
 
@@ -11,13 +11,6 @@ const getRandomNumber = (max: number) => {
   const array = new Uint32Array(1);
   window.crypto.getRandomValues(array);
   return array[0] % max;
-};
-
-// Define image types and counts
-const IMAGE_TYPES = {
-  gif: { count: 4, ext: 'gif' },
-  png: { count: 14, ext: 'png' },
-  jpg: { count: 23, ext: 'jpg' }
 };
 
 // File number ranges
@@ -65,7 +58,7 @@ export default function Home() {
     return 'jpg';
   };
 
-  const spawnAd = () => {
+  const spawnAd = useCallback(() => {
     const type = getRandomImageType();
     const fileNumber = getValidFileNumber(type);
     
@@ -78,13 +71,13 @@ export default function Home() {
     };
 
     setAds(prev => [...prev.slice(-100), newAd]); // Allow up to 100 ads
-  };
+  }, []);
 
-  const spawnMultiple = (count: number) => {
+  const spawnMultiple = useCallback((count: number) => {
     for (let i = 0; i < count; i++) {
       setTimeout(spawnAd, i * 10); // Super fast spawning
     }
-  };
+  }, [spawnAd]);
 
   useEffect(() => {
     // Initial burst of ads
@@ -134,7 +127,7 @@ export default function Home() {
       window.removeEventListener('click', handleClick);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [spawnMultiple]);
 
   return (
     <main className="min-h-screen bg-black text-white relative">
