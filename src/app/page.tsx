@@ -7,107 +7,137 @@ import styles from './page.module.css';
 let uniqueId = 0;
 const getUniqueId = () => `ad-${Date.now()}-${uniqueId++}`;
 
+const getRandomNumber = (max: number) => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return array[0] % max;
+};
+
+// Define image types and counts
+const IMAGE_TYPES = {
+  gif: { count: 4, ext: 'gif' },
+  png: { count: 14, ext: 'png' },
+  jpg: { count: 23, ext: 'jpg' }
+};
+
+// File number ranges
+const FILE_RANGES = {
+  jpg: { start: 15, end: 37 },
+  png: { start: 1, end: 14 },
+  gif: { start: 1, end: 4 }
+};
+
+const getValidFileNumber = (type: 'gif' | 'png' | 'jpg'): number => {
+  const range = FILE_RANGES[type];
+  return getRandomNumber(range.end - range.start + 1) + range.start;
+};
+
 export default function Home() {
   const [ads, setAds] = useState<{
     id: string;
     position: { x: number; y: number };
-    isGif: boolean;
+    type: 'gif' | 'png' | 'jpg';
     fileNumber: number;
     size: { width: number; height: number };
   }[]>([]);
 
-  const getRandomNumber = (max: number) => {
-    const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-    return array[0] % max;
-  };
-
   const getRandomPosition = () => {
     return {
-      x: getRandomNumber(typeof window !== 'undefined' ? window.innerWidth - 150 : 800),
-      y: getRandomNumber(typeof window !== 'undefined' ? window.innerHeight - 150 : 600)
+      x: getRandomNumber(typeof window !== 'undefined' ? window.innerWidth - 100 : 800),
+      y: getRandomNumber(typeof window !== 'undefined' ? window.innerHeight - 100 : 600)
     };
   };
 
   const getRandomSize = () => {
     const sizes = [
-      { width: 150, height: 150 },
-      { width: 200, height: 200 },
-      { width: 250, height: 250 },
-      { width: 300, height: 300 }
+      { width: 50, height: 50 },     // Tiny ads
+      { width: 70, height: 70 },     // Small ads
+      { width: 150, height: 150 },   // Medium ads
+      { width: 500, height: 500 }    // Large ads
     ];
     return sizes[getRandomNumber(sizes.length)];
   };
 
+  const getRandomImageType = (): 'gif' | 'png' | 'jpg' => {
+    const rand = Math.random();
+    if (rand < 0.6) return 'gif';  // 60% GIFs for maximum annoyance
+    if (rand < 0.8) return 'png';
+    return 'jpg';
+  };
+
   const spawnAd = () => {
-    const isGif = Math.random() > 0.4;
-    const fileNumber = isGif ? getRandomNumber(4) + 1 : getRandomNumber(14) + 1;
+    const type = getRandomImageType();
+    const fileNumber = getValidFileNumber(type);
     
     const newAd = {
       id: getUniqueId(),
       position: getRandomPosition(),
-      isGif,
+      type,
       fileNumber,
       size: getRandomSize()
     };
 
-    setAds(prev => [...prev.slice(-20), newAd]);
+    setAds(prev => [...prev.slice(-100), newAd]); // Allow up to 100 ads
+  };
+
+  const spawnMultiple = (count: number) => {
+    for (let i = 0; i < count; i++) {
+      setTimeout(spawnAd, i * 10); // Super fast spawning
+    }
   };
 
   useEffect(() => {
     // Initial burst of ads
-    for (let i = 0; i < 12; i++) {
-      setTimeout(spawnAd, i * 100);
-    }
+    spawnMultiple(50); // Start with 50 ads
 
-    // Multiple spawn intervals for more chaos
+    // Multiple spawn intervals for absolute chaos
     const spawnIntervals = [
-      setInterval(spawnAd, 500),
-      setInterval(spawnAd, 800),
-      setInterval(spawnAd, 1000),
-      setInterval(spawnAd, 1200)
+      setInterval(() => spawnMultiple(3), 100),  // Spawn 3 ads every 100ms
+      setInterval(() => spawnMultiple(2), 150),  // Spawn 2 ads every 150ms
+      setInterval(() => spawnMultiple(2), 200),  // Spawn 2 ads every 200ms
+      setInterval(() => spawnMultiple(3), 250),  // Spawn 3 ads every 250ms
+      setInterval(() => spawnMultiple(2), 300),  // Spawn 2 ads every 300ms
     ];
-
-    // Spawn ads on mouse movement
-    const handleMouseMove = () => {
-      if (Math.random() > 0.7) spawnAd();
-    };
 
     // Spawn ads on scroll
     const handleScroll = () => {
-      if (Math.random() > 0.6) spawnAd();
+      spawnMultiple(10); // 10 ads on scroll
     };
 
     // Spawn ads on click
     const handleClick = () => {
-      if (Math.random() > 0.5) {
-        for (let i = 0; i < 3; i++) {
-          setTimeout(spawnAd, i * 100);
-        }
+      spawnMultiple(15); // 15 ads on click
+    };
+
+    // Spawn ads on mouse movement
+    const handleMouseMove = () => {
+      if (Math.random() > 0.5) { // 50% chance
+        spawnMultiple(3); // 3 ads on mouse move
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('click', handleClick);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Additional random bursts
+    const burstInterval = setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance
+        spawnMultiple(Math.floor(Math.random() * 10) + 5); // 5-15 ads randomly
+      }
+    }, 1000);
 
     return () => {
       spawnIntervals.forEach(clearInterval);
-      window.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(burstInterval);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('click', handleClick);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
   return (
     <main className="min-h-screen bg-black text-white relative">
-      {/* Background Content */}
-      <div className={styles.mainContent}>
-        <h1 className={styles.mainTitle}>$TNTC</h1>
-        <p className={styles.subtitle}>Try Not To Cum</p>
-        <p className={styles.description}>The Most Annoying Token On Solana</p>
-      </div>
-
       {/* Pop-up Ads Layer */}
       <div className={styles.adLayer}>
         {ads.map((ad, index) => (
@@ -123,21 +153,29 @@ export default function Home() {
             }}
           >
             <button
-              onClick={() => {
-                // 75% chance to spawn multiple new ads when closing
-                if (Math.random() < 0.75) {
-                  for (let i = 0; i < 4; i++) {
-                    setTimeout(spawnAd, i * 50);
-                  }
+              onClick={(e) => {
+                e.stopPropagation();
+                // 98% chance to spawn multiple new ads when closing
+                if (Math.random() < 0.98) {
+                  spawnMultiple(Math.floor(Math.random() * 10) + 10); // 10-20 new ads
                 }
                 setAds(prev => prev.filter(a => a.id !== ad.id));
               }}
               className={styles.closeButton}
+              onMouseEnter={(e) => {
+                // 70% chance to move button when hovering
+                if (Math.random() < 0.7) {
+                  const btn = e.target as HTMLButtonElement;
+                  btn.style.transform = `translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px)`;
+                }
+              }}
             >
               ×
             </button>
             <Image
-              src={`/ads/${ad.isGif ? 'gif' : 'ad'}${ad.fileNumber}.${ad.isGif ? 'gif' : 'png'}`}
+              src={ad.type === 'gif' 
+                ? `/ads/gif${ad.fileNumber}.gif`
+                : `/ads/ad${ad.fileNumber}.${ad.type}`}
               alt="Ad"
               width={ad.size.width}
               height={ad.size.height}
@@ -146,6 +184,13 @@ export default function Home() {
             />
           </div>
         ))}
+      </div>
+
+      {/* Background Content - Now behind ads */}
+      <div className={styles.mainContent}>
+        <h1 className={styles.mainTitle}>$TNTC</h1>
+        <p className={styles.subtitle}>Try Not To Cum</p>
+        <p className={styles.description}>The Most Annoying Token On Solana</p>
       </div>
     </main>
   );
