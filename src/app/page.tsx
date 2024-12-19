@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { Header } from '@/components/Header';
 import styles from './page.module.css';
 
 let uniqueId = 0;
@@ -24,6 +25,9 @@ const getValidFileNumber = (type: 'gif' | 'png' | 'jpg'): number => {
   const range = FILE_RANGES[type];
   return getRandomNumber(range.end - range.start + 1) + range.start;
 };
+
+// Contract Address
+const CONTRACT_ADDRESS = "000000000000000000000000000000000000"; // Replace with actual contract address
 
 export default function Home() {
   const [ads, setAds] = useState<{
@@ -131,6 +135,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black text-white relative">
+      <Header />
       {/* Pop-up Ads Layer */}
       <div className={styles.adLayer}>
         {ads.map((ad, index) => (

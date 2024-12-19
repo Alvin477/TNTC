@@ -108,4 +108,63 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  border-bottom: 1px solid rgba(255, 0, 222, 0.3);
+}
+
+.contractBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: monospace;
+  color: #fff;
+}
+
+.contractBox:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.02);
+}
+
+.copyIcon {
+  transition: all 0.2s ease;
+}
+
+.contractBox:hover .copyIcon {
+  transform: scale(1.1);
+}
+
+.socials {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.socialLink {
+  color: white;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.socialLink:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  color: #ff00de;
 } 
