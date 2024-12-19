@@ -26,9 +26,6 @@ const getValidFileNumber = (type: 'gif' | 'png' | 'jpg'): number => {
   return getRandomNumber(range.end - range.start + 1) + range.start;
 };
 
-// Contract Address
-const CONTRACT_ADDRESS = "000000000000000000000000000000000000"; // Replace with actual contract address
-
 export default function Home() {
   const [ads, setAds] = useState<{
     id: string;
